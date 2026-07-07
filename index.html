@@ -297,21 +297,21 @@
                                 <div className="space-y-3 text-sm">
                                     <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-rpgRed border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">BOTÓN A</span>
+                                            <span className="bg-rpgRed border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">A</span>
                                             <span className="font-black text-rpgRed uppercase">Ataque</span>
                                         </div>
                                         <div className="font-bold ml-1">{currentPlayer.microA}</div>
                                     </div>
                                     <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-blue-400 border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">BOTÓN B</span>
+                                            <span className="bg-blue-400 border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">D</span>
                                             <span className="font-black text-blue-600 uppercase">Defensa</span>
                                         </div>
                                         <div className="font-bold ml-1">{currentPlayer.microD}</div>
                                     </div>
                                     <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-rpgGreen border-2 border-rpgBorder text-rpgText px-2 py-1 rounded-lg font-black">A + B</span>
+                                            <span className="bg-rpgGreen border-2 border-rpgBorder text-rpgText px-2 py-1 rounded-lg font-black">E</span>
                                             <span className="font-black text-rpgGreen uppercase">Escaneo</span>
                                         </div>
                                         <div className="font-bold ml-1">{currentPlayer.microE}</div>
@@ -453,7 +453,7 @@
 
                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-rpgInner p-2 rounded-lg border-2 border-rpgBorder">
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-black uppercase text-rpgRed">Botón A (Ataque):</label>
+                                                            <label className="text-[10px] font-black uppercase text-rpgRed">A:</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={roles[key].microA}
@@ -462,7 +462,7 @@
                                                             />
                                                         </div>
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-black uppercase text-blue-800">Botón B (Defensa):</label>
+                                                            <label className="text-[10px] font-black uppercase text-blue-800">D:</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={roles[key].microD}
@@ -471,7 +471,7 @@
                                                             />
                                                         </div>
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-black uppercase text-rpgGreen">A+B (Escaneo):</label>
+                                                            <label className="text-[10px] font-black uppercase text-rpgGreen">E:</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={roles[key].microE}
