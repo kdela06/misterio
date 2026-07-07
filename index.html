@@ -56,27 +56,9 @@
             "cable11": { name: "El Electricista", story: "Sabes cómo sabotear relés mecánicos para apagones.", alibi: "Reparando un cuadro de luces.", microA: "Sobrecarga Magnética", microD: "Aislamiento de Cobre", microE: "Diagnóstico de Red" }
         };
 
-        const BANCO_PREGUNTAS = [
+        const INITIAL_BANCO = [
             { id: 1, title: "1. El Apagón Inicial", question: "A las 23:05, la energía falló. ¿Cuál fue vuestra primera reacción?", options: [{text: "Rearmar generador", minDice: 12}, {text: "Cubrir salidas", minDice: 10}, {text: "Asegurar vitrinas", minDice: 14}] },
-            { id: 2, title: "2. El Té Adulterado", question: "El vigilante cayó dormido. ¿Quién tuvo acceso a la sala de descanso?", options: [{text: "Nadie, estaba cerrada", minDice: 15}, {text: "Personal de limpieza", minDice: 8}, {text: "Revisar cámaras previas", minDice: 12}] },
-            { id: 3, title: "3. Residuos Químicos", question: "Hay olor a acetato cerca de la vitrina. ¿A qué se debe?", options: [{text: "Barnices de restauración", minDice: 10}, {text: "Líquido refrigerante", minDice: 12}, {text: "Ataque corrosivo", minDice: 16}] },
-            { id: 4, title: "4. Bucle de Seguridad", question: "Las cámaras fueron puestas en bucle. ¿Cómo lo hicieron?", options: [{text: "Corte de cable coaxial", minDice: 10}, {text: "Hackeo por radio", minDice: 15}, {text: "Software espía", minDice: 13}] },
-            { id: 5, title: "5. Pisadas de Redstone", question: "Huellas de polvo rojizo van hacia los talleres.", options: [{text: "Seguir el rastro", minDice: 10}, {text: "Analizar el polvo", minDice: 14}, {text: "Borrar evidencia accidental", minDice: 18}] },
-            { id: 6, title: "6. Llavero Perdido", question: "Un juego de llaves maestras en el jardín trasero.", options: [{text: "Comprobar inventario", minDice: 12}, {text: "Buscar huellas dactilares", minDice: 15}, {text: "Ignorarlo, es señuelo", minDice: 8}] },
-            { id: 7, title: "7. Frecuencia Anómala", question: "Se captó una señal pirata durante el robo.", options: [{text: "Rastrear IP", minDice: 16}, {text: "Bloquear canal", minDice: 12}, {text: "Triangular posición", minDice: 14}] },
-            { id: 8, title: "8. El Cuadro Eléctrico", question: "Se encontró un puente de cobre no reglamentario.", options: [{text: "Aislar la zona", minDice: 10}, {text: "Deshacer el puente", minDice: 14}, {text: "Buscar herramientas cerca", minDice: 12}] },
-            { id: 9, title: "9. Archivos Borrados", question: "Planos de ventilación borrados de la base de datos.", options: [{text: "Restaurar copia local", minDice: 15}, {text: "Rastrear acceso", minDice: 12}, {text: "Avisar seguridad", minDice: 10}] },
-            { id: 10, title: "10. Rastro en Conductos", question: "Mancha de barniz fresco en la rejilla de ventilación.", options: [{text: "Sellar rejillas", minDice: 10}, {text: "Mandar dron explorador", minDice: 14}, {text: "Tomar muestra", minDice: 12}] },
-            { id: 11, title: "11. Dron Reprogramado", question: "El dron limpió evidencias del pasillo central.", options: [{text: "Apagar remotamente", minDice: 12}, {text: "Extraer disco duro", minDice: 16}, {text: "Atraparlo físicamente", minDice: 10}] },
-            { id: 12, title: "12. Filtro Roto", question: "Cristales de un filtro ultravioleta roto en el suelo.", options: [{text: "Recoger sin tocar", minDice: 10}, {text: "Analizar refracción", minDice: 15}, {text: "Buscar emisor cercano", minDice: 13}] },
-            { id: 13, title: "13. Señal de Navegación", question: "Dispositivo no registrado en el garaje.", options: [{text: "Bloquear salida", minDice: 12}, {text: "Hackear GPS", minDice: 16}, {text: "Inspeccionar vehículos", minDice: 10}] },
-            { id: 14, title: "14. Puerta Magnética", question: "La cerradura se abrió con tarjeta clonada.", options: [{text: "Anular todas las tarjetas", minDice: 12}, {text: "Revisar log de accesos", minDice: 14}, {text: "Cerrar puertas manuales", minDice: 10}] },
-            { id: 15, title: "15. Material Aislante", question: "Cinta negra en los sensores de movimiento.", options: [{text: "Retirar cuidadosamente", minDice: 10}, {text: "Calibrar sensores", minDice: 14}, {text: "Activar láseres de repuesto", minDice: 12}] },
-            { id: 16, title: "16. Rastro Térmico", question: "Los sensores detectaron a dos personas juntas.", options: [{text: "Interrogar en parejas", minDice: 12}, {text: "Revisar calibración térmica", minDice: 15}, {text: "Buscar cómplices", minDice: 10}] },
-            { id: 17, title: "17. Mensajes Borrados", question: "El terminal de comunicaciones fue vaciado.", options: [{text: "Llamar soporte técnico", minDice: 10}, {text: "Recuperación profunda", minDice: 16}, {text: "Buscar cámara apuntando ahí", minDice: 12}] },
-            { id: 18, title: "18. Herramienta Perdida", question: "Falta un destornillador sónico del kit.", options: [{text: "Auditoría de herramientas", minDice: 10}, {text: "Escanear magnetismo", minDice: 15}, {text: "Buscar en taquillas", minDice: 13}] },
-            { id: 19, title: "19. La Huida", question: "Un vehículo arrancó a oscuras en la calle trasera.", options: [{text: "Anotar matrícula", minDice: 12}, {text: "Persecución dron", minDice: 16}, {text: "Avisar patrullas", minDice: 10}] },
-            { id: 20, title: "20. El Veredicto Final", question: "¿Quién tiene la Placa Ancestral y cómo lo hizo?", options: [{text: "Señalar con evidencia", minDice: 18}, {text: "Farol de seguridad", minDice: 12}, {text: "Trampa lógica", minDice: 15}] }
+            { id: 2, title: "2. El Té Adulterado", question: "El vigilante cayó dormido. ¿Quién tuvo acceso a la sala de descanso?", options: [{text: "Nadie, estaba cerrada", minDice: 15}, {text: "Personal de limpieza", minDice: 8}, {text: "Revisar cámaras previas", minDice: 12}] }
         ];
 
         function App() {
@@ -92,10 +74,13 @@
                 "El Vigilante": 100, "El Historiador": 100, "La Restauradora": 100, "El Guía Turístico": 100, "El Electricista": 100
             });
 
-            const [liveQuestion, setLiveQuestion] = useState(BANCO_PREGUNTAS[0].question);
-            const [liveOptions, setLiveOptions] = useState(BANCO_PREGUNTAS[0].options);
+            // Estado para el banco dinámico de preguntas
+            const [bancoPreguntas, setBancoPreguntas] = useState(INITIAL_BANCO);
+            const [indiceSeleccionado, setIndiceSeleccionado] = useState(0);
+
+            const [liveQuestion, setLiveQuestion] = useState(INITIAL_BANCO[0].question);
+            const [liveOptions, setLiveOptions] = useState(INITIAL_BANCO[0].options);
             
-            // Estado para minimizar/maximizar el panel de edición de personajes
             const [showRoleEditor, setShowRoleEditor] = useState(false);
 
             useEffect(() => {
@@ -105,6 +90,9 @@
                     if (data) {
                         if (data.roles_json) setRoles(data.roles_json);
                         if (data.pregunta_actual) setLiveQuestion(data.pregunta_actual);
+                        if (data.banco_json && data.banco_json.length > 0) {
+                            setBancoPreguntas(data.banco_json);
+                        }
                     }
                 });
 
@@ -112,6 +100,7 @@
                     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'juego_museo' }, payload => {
                         if (payload.new.roles_json) setRoles(payload.new.roles_json);
                         if (payload.new.pregunta_actual) setLiveQuestion(payload.new.pregunta_actual);
+                        if (payload.new.banco_json) setBancoPreguntas(payload.new.banco_json);
                     })
                     .subscribe();
 
@@ -126,17 +115,52 @@
             }, [roles]);
 
             const cargarDelBanco = (indice) => {
-                const seleccion = BANCO_PREGUNTAS[indice];
-                setLiveQuestion(seleccion.question);
-                setLiveOptions(seleccion.options.map(o => ({...o}))); 
+                setIndiceSeleccionado(indice);
+                const seleccion = bancoPreguntas[indice];
+                if(seleccion) {
+                    setLiveQuestion(seleccion.question);
+                    setLiveOptions(seleccion.options.map(o => ({...o}))); 
+                }
             };
 
-            const guardarEnLaNube = async (nuevosRoles, nuevaPregunta) => {
+            const guardarEnLaNube = async (nuevosRoles, nuevaPregunta, nuevoBanco) => {
                 if (!clienteSupabase) return;
                 await clienteSupabase.from('juego_museo').update({
                     roles_json: nuevosRoles,
-                    pregunta_actual: nuevaPregunta
+                    pregunta_actual: nuevaPregunta,
+                    banco_json: nuevoBanco
                 }).eq('id', 'partida_1');
+            };
+
+            const guardarNuevaPregunta = () => {
+                const tituloCorto = liveQuestion.substring(0, 20) + "...";
+                const nuevaPreguntaObj = {
+                    id: Date.now(),
+                    title: `${bancoPreguntas.length + 1}. ${tituloCorto}`,
+                    question: liveQuestion,
+                    options: [...liveOptions]
+                };
+                
+                const nuevoBanco = [...bancoPreguntas, nuevaPreguntaObj];
+                setBancoPreguntas(nuevoBanco);
+                setIndiceSeleccionado(nuevoBanco.length - 1);
+                guardarEnLaNube(roles, liveQuestion, nuevoBanco);
+                alert("¡Nueva pista guardada en el archivo!");
+            };
+
+            const eliminarPregunta = () => {
+                if(bancoPreguntas.length <= 1) {
+                    alert("No puedes borrar la última pregunta del archivo.");
+                    return;
+                }
+                if(window.confirm("¿Seguro que quieres borrar esta pista para siempre?")) {
+                    const nuevoBanco = bancoPreguntas.filter((_, idx) => idx !== indiceSeleccionado);
+                    setBancoPreguntas(nuevoBanco);
+                    setIndiceSeleccionado(0);
+                    setLiveQuestion(nuevoBanco[0].question);
+                    setLiveOptions(nuevoBanco[0].options.map(o => ({...o})));
+                    guardarEnLaNube(roles, nuevoBanco[0].question, nuevoBanco);
+                }
             };
 
             const updateOptionText = (index, value) => {
@@ -273,21 +297,21 @@
                                 <div className="space-y-3 text-sm">
                                     <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-rpgRed border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">A</span>
+                                            <span className="bg-rpgRed border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">BOTÓN A</span>
                                             <span className="font-black text-rpgRed uppercase">Ataque</span>
                                         </div>
                                         <div className="font-bold ml-1">{currentPlayer.microA}</div>
                                     </div>
                                     <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-blue-400 border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">D</span>
+                                            <span className="bg-blue-400 border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">BOTÓN B</span>
                                             <span className="font-black text-blue-600 uppercase">Defensa</span>
                                         </div>
                                         <div className="font-bold ml-1">{currentPlayer.microD}</div>
                                     </div>
                                     <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-rpgGreen border-2 border-rpgBorder text-rpgText px-2 py-1 rounded-lg font-black">E</span>
+                                            <span className="bg-rpgGreen border-2 border-rpgBorder text-rpgText px-2 py-1 rounded-lg font-black">A + B</span>
                                             <span className="font-black text-rpgGreen uppercase">Escaneo</span>
                                         </div>
                                         <div className="font-bold ml-1">{currentPlayer.microE}</div>
@@ -311,7 +335,7 @@
                                         <h3 className="font-black text-2xl text-rpgText uppercase">Consola del Master</h3>
                                     </div>
                                     <button 
-                                        onClick={() => guardarEnLaNube(roles, liveQuestion)}
+                                        onClick={() => guardarEnLaNube(roles, liveQuestion, bancoPreguntas)}
                                         className="bg-rpgGreen border-4 border-rpgBorder text-rpgText font-black text-sm px-6 py-3 rounded-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none uppercase flex items-center gap-2"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
@@ -319,25 +343,35 @@
                                     </button>
                                 </div>
 
-                                {/* SELECTOR DEL BANCO DE PREGUNTAS */}
+                                {/* SELECTOR DEL BANCO DE PREGUNTAS Y BOTÓN ELIMINAR */}
                                 <div className="space-y-2 bg-rpgInner p-4 rounded-xl border-4 border-rpgBorder">
                                     <label className="block text-sm font-black uppercase text-rpgText flex items-center gap-2">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                                        Archivo de Eventos (Cargar Pista):
+                                        Archivo de Eventos Guardados:
                                     </label>
-                                    <select 
-                                        onChange={(e) => cargarDelBanco(e.target.value)}
-                                        className="w-full bg-white border-4 border-rpgBorder rounded-xl p-2 font-bold text-rpgText focus:outline-none cursor-pointer"
-                                    >
-                                        {BANCO_PREGUNTAS.map((pregunta, idx) => (
-                                            <option key={pregunta.id} value={idx}>{pregunta.title}</option>
-                                        ))}
-                                    </select>
+                                    <div className="flex items-center gap-2">
+                                        <select 
+                                            value={indiceSeleccionado}
+                                            onChange={(e) => cargarDelBanco(Number(e.target.value))}
+                                            className="w-full bg-white border-4 border-rpgBorder rounded-xl p-2 font-bold text-rpgText focus:outline-none cursor-pointer"
+                                        >
+                                            {bancoPreguntas.map((pregunta, idx) => (
+                                                <option key={pregunta.id} value={idx}>{pregunta.title}</option>
+                                            ))}
+                                        </select>
+                                        <button 
+                                            onClick={eliminarPregunta}
+                                            title="Borrar Pista"
+                                            className="bg-rpgRed text-white p-2 border-4 border-rpgBorder rounded-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none transition-all flex-shrink-0"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* INSTRUCCIÓN DE CONSOLA GLOBAL */}
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-black uppercase text-rpgText">Instrucción de Consola Global (Texto en Pantalla):</label>
+                                    <label className="block text-sm font-black uppercase text-rpgText">Texto en Pantalla (Editor):</label>
                                     <textarea 
                                         value={liveQuestion}
                                         onChange={(e) => setLiveQuestion(e.target.value)}
@@ -370,6 +404,15 @@
                                         </div>
                                     ))}
                                 </div>
+                                
+                                {/* BOTÓN GUARDAR COMO NUEVA */}
+                                <button 
+                                    onClick={guardarNuevaPregunta}
+                                    className="w-full bg-blue-400 border-4 border-rpgBorder text-rpgText font-black uppercase text-sm px-4 py-3 rounded-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none transition-all flex justify-center items-center gap-2"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                    Guardar Como Nueva Pista
+                                </button>
 
                                 {/* ACORDEÓN: MODIFICAR HISTORIAS Y MICRO:BITS */}
                                 <div className="pt-4 border-t-4 border-rpgBorder/20">
@@ -410,7 +453,7 @@
 
                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-rpgInner p-2 rounded-lg border-2 border-rpgBorder">
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-black uppercase text-rpgRed">A:</label>
+                                                            <label className="text-[10px] font-black uppercase text-rpgRed">Botón A (Ataque):</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={roles[key].microA}
@@ -419,7 +462,7 @@
                                                             />
                                                         </div>
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-black uppercase text-blue-800">D:</label>
+                                                            <label className="text-[10px] font-black uppercase text-blue-800">Botón B (Defensa):</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={roles[key].microD}
@@ -428,7 +471,7 @@
                                                             />
                                                         </div>
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-black uppercase text-rpgGreen">E:</label>
+                                                            <label className="text-[10px] font-black uppercase text-rpgGreen">A+B (Escaneo):</label>
                                                             <input 
                                                                 type="text" 
                                                                 value={roles[key].microE}
