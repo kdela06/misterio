@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misterio en el Museo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Fredoka', 'sans-serif'], 
+                    },
+                    colors: {
+                        rpgBg: '#5B4A42',       
+                        rpgCard: '#D4B383',     
+                        rpgInner: '#B89A72',    
+                        rpgBorder: '#362720',   
+                        rpgText: '#261C16',     
+                        rpgGreen: '#A3D16A',    
+                        rpgRed: '#ED726B',      
+                        rpgYellow: '#F2C15D',   
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-rpgBg text-rpgText min-h-screen font-sans selection:bg-rpgRed selection:text-white">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const SUPABASE_URL = "https://ybbbfuysdagbojvfsxbu.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InliYmJmdXlzZGFnYm9qdmZzeGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDg3OTIsImV4cCI6MjA5OTAyNDc5Mn0.5lV-FQS8rys6DwlAyGvVkbbOjjDbKLJJNkNxoLWrUQo";
+        
+        const clienteSupabase = (SUPABASE_URL !== "TU_URL_DE_SUPABASE_AQUI" && window.supabase) 
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+            : null;
+
+        const INITIAL_ROLES = {
+            "vigilante77": { name: "El Vigilante", story: "Llevas 10 años vigilando. Te quedaste dormido tras tomar té.", alibi: "En la cabina de control analógica.", microA: "Destello Eléctrico", microD: "Escudo de Seguridad", microE: "Cámara Analógica" },
+            "historia33": { name: "El Historiador", story: "Crees que el museo trata las reliquias como juguetes.", alibi: "Catalogando manuscritos en el sótano.", microA: "Crítica Académica", microD: "Cúpula Documental", microE: "Análisis de Firmas" },
+            "pincel99": { name: "La Restauradora", story: "Eres secretamente el ladrón. Necesitas energía para tus robots.", alibi: "Cerrada con llave usando químicos tóxicos.", microA: "Disolvente Químico", microD: "Capa Blindada", microE: "Firma Falsa de Radio" },
+            "brujula22": { name: "El Guía Turístico", story: "Conoces los pasadizos secretos y conductos de ventilación.", alibi: "Buscando un llavero en el jardín a oscuras.", microA: "Atajo Sorpresa", microD: "Trampilla de Escape", microE: "Mapa del Terreno" },
+            "cable11": { name: "El Electricista", story: "Sabes cómo sabotear relés mecánicos para apagones.", alibi: "Reparando un cuadro de luces.", microA: "Sobrecarga Magnética", microD: "Aislamiento de Cobre", microE: "Diagnóstico de Red" }
+        };
+
+        const BANCO_PREGUNTAS = [
+            { id: 1, title: "1. El Apagón Inicial", question: "A las 23:05, la energía falló. ¿Cuál fue vuestra primera reacción?", options: [{text: "Rearmar generador", minDice: 12}, {text: "Cubrir salidas", minDice: 10}, {text: "Asegurar vitrinas", minDice: 14}] },
+            { id: 2, title: "2. El Té Adulterado", question: "El vigilante cayó dormido. ¿Quién tuvo acceso a la sala de descanso?", options: [{text: "Nadie, estaba cerrada", minDice: 15}, {text: "Personal de limpieza", minDice: 8}, {text: "Revisar cámaras previas", minDice: 12}] },
+            { id: 3, title: "3. Residuos Químicos", question: "Hay olor a acetato cerca de la vitrina. ¿A qué se debe?", options: [{text: "Barnices de restauración", minDice: 10}, {text: "Líquido refrigerante", minDice: 12}, {text: "Ataque corrosivo", minDice: 16}] },
+            { id: 4, title: "4. Bucle de Seguridad", question: "Las cámaras fueron puestas en bucle. ¿Cómo lo hicieron?", options: [{text: "Corte de cable coaxial", minDice: 10}, {text: "Hackeo por radio", minDice: 15}, {text: "Software espía", minDice: 13}] },
+            { id: 5, title: "5. Pisadas de Redstone", question: "Huellas de polvo rojizo van hacia los talleres.", options: [{text: "Seguir el rastro", minDice: 10}, {text: "Analizar el polvo", minDice: 14}, {text: "Borrar evidencia accidental", minDice: 18}] },
+            { id: 6, title: "6. Llavero Perdido", question: "Un juego de llaves maestras en el jardín trasero.", options: [{text: "Comprobar inventario", minDice: 12}, {text: "Buscar huellas dactilares", minDice: 15}, {text: "Ignorarlo, es señuelo", minDice: 8}] },
+            { id: 7, title: "7. Frecuencia Anómala", question: "Se captó una señal pirata durante el robo.", options: [{text: "Rastrear IP", minDice: 16}, {text: "Bloquear canal", minDice: 12}, {text: "Triangular posición", minDice: 14}] },
+            { id: 8, title: "8. El Cuadro Eléctrico", question: "Se encontró un puente de cobre no reglamentario.", options: [{text: "Aislar la zona", minDice: 10}, {text: "Deshacer el puente", minDice: 14}, {text: "Buscar herramientas cerca", minDice: 12}] },
+            { id: 9, title: "9. Archivos Borrados", question: "Planos de ventilación borrados de la base de datos.", options: [{text: "Restaurar copia local", minDice: 15}, {text: "Rastrear acceso", minDice: 12}, {text: "Avisar seguridad", minDice: 10}] },
+            { id: 10, title: "10. Rastro en Conductos", question: "Mancha de barniz fresco en la rejilla de ventilación.", options: [{text: "Sellar rejillas", minDice: 10}, {text: "Mandar dron explorador", minDice: 14}, {text: "Tomar muestra", minDice: 12}] },
+            { id: 11, title: "11. Dron Reprogramado", question: "El dron limpió evidencias del pasillo central.", options: [{text: "Apagar remotamente", minDice: 12}, {text: "Extraer disco duro", minDice: 16}, {text: "Atraparlo físicamente", minDice: 10}] },
+            { id: 12, title: "12. Filtro Roto", question: "Cristales de un filtro ultravioleta roto en el suelo.", options: [{text: "Recoger sin tocar", minDice: 10}, {text: "Analizar refracción", minDice: 15}, {text: "Buscar emisor cercano", minDice: 13}] },
+            { id: 13, title: "13. Señal de Navegación", question: "Dispositivo no registrado en el garaje.", options: [{text: "Bloquear salida", minDice: 12}, {text: "Hackear GPS", minDice: 16}, {text: "Inspeccionar vehículos", minDice: 10}] },
+            { id: 14, title: "14. Puerta Magnética", question: "La cerradura se abrió con tarjeta clonada.", options: [{text: "Anular todas las tarjetas", minDice: 12}, {text: "Revisar log de accesos", minDice: 14}, {text: "Cerrar puertas manuales", minDice: 10}] },
+            { id: 15, title: "15. Material Aislante", question: "Cinta negra en los sensores de movimiento.", options: [{text: "Retirar cuidadosamente", minDice: 10}, {text: "Calibrar sensores", minDice: 14}, {text: "Activar láseres de repuesto", minDice: 12}] },
+            { id: 16, title: "16. Rastro Térmico", question: "Los sensores detectaron a dos personas juntas.", options: [{text: "Interrogar en parejas", minDice: 12}, {text: "Revisar calibración térmica", minDice: 15}, {text: "Buscar cómplices", minDice: 10}] },
+            { id: 17, title: "17. Mensajes Borrados", question: "El terminal de comunicaciones fue vaciado.", options: [{text: "Llamar soporte técnico", minDice: 10}, {text: "Recuperación profunda", minDice: 16}, {text: "Buscar cámara apuntando ahí", minDice: 12}] },
+            { id: 18, title: "18. Herramienta Perdida", question: "Falta un destornillador sónico del kit.", options: [{text: "Auditoría de herramientas", minDice: 10}, {text: "Escanear magnetismo", minDice: 15}, {text: "Buscar en taquillas", minDice: 13}] },
+            { id: 19, title: "19. La Huida", question: "Un vehículo arrancó a oscuras en la calle trasera.", options: [{text: "Anotar matrícula", minDice: 12}, {text: "Persecución dron", minDice: 16}, {text: "Avisar patrullas", minDice: 10}] },
+            { id: 20, title: "20. El Veredicto Final", question: "¿Quién tiene la Placa Ancestral y cómo lo hizo?", options: [{text: "Señalar con evidencia", minDice: 18}, {text: "Farol de seguridad", minDice: 12}, {text: "Trampa lógica", minDice: 15}] }
+        ];
+
+        function App() {
+            const [view, setView] = useState('login');
+            const [password, setPassword] = useState('');
+            const [errorMsg, setErrorMsg] = useState('');
+            const [isHoldingReveal, setIsHoldingReveal] = useState(false);
+            
+            const [roles, setRoles] = useState(INITIAL_ROLES);
+            const [currentPlayer, setCurrentPlayer] = useState(null);
+            const [playerHP, setPlayerHP] = useState(100);
+            const [playersScores, setPlayersScores] = useState({
+                "El Vigilante": 100, "El Historiador": 100, "La Restauradora": 100, "El Guía Turístico": 100, "El Electricista": 100
+            });
+
+            const [liveQuestion, setLiveQuestion] = useState(BANCO_PREGUNTAS[0].question);
+            const [liveOptions, setLiveOptions] = useState(BANCO_PREGUNTAS[0].options);
+
+            useEffect(() => {
+                if (!clienteSupabase) return;
+
+                clienteSupabase.from('juego_museo').select('*').eq('id', 'partida_1').single().then(({ data }) => {
+                    if (data) {
+                        if (data.roles_json) setRoles(data.roles_json);
+                        if (data.pregunta_actual) setLiveQuestion(data.pregunta_actual);
+                    }
+                });
+
+                const channel = clienteSupabase.channel('cambios-museo')
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'juego_museo' }, payload => {
+                        if (payload.new.roles_json) setRoles(payload.new.roles_json);
+                        if (payload.new.pregunta_actual) setLiveQuestion(payload.new.pregunta_actual);
+                    })
+                    .subscribe();
+
+                return () => { clienteSupabase.removeChannel(channel); };
+            }, []);
+
+            useEffect(() => {
+                if (currentPlayer) {
+                    const matchedRole = Object.values(roles).find(r => r.name === currentPlayer.name);
+                    if (matchedRole) setCurrentPlayer(matchedRole);
+                }
+            }, [roles]);
+
+            const cargarDelBanco = (indice) => {
+                const seleccion = BANCO_PREGUNTAS[indice];
+                setLiveQuestion(seleccion.question);
+                setLiveOptions(seleccion.options.map(o => ({...o}))); // Copia profunda
+            };
+
+            const guardarEnLaNube = async (nuevosRoles, nuevaPregunta) => {
+                if (!clienteSupabase) return;
+                await clienteSupabase.from('juego_museo').update({
+                    roles_json: nuevosRoles,
+                    pregunta_actual: nuevaPregunta
+                }).eq('id', 'partida_1');
+            };
+
+            const updateOptionText = (index, value) => {
+                const updated = [...liveOptions];
+                updated[index].text = value;
+                setLiveOptions(updated);
+            };
+
+            const updateOptionDice = (index, value) => {
+                const updated = [...liveOptions];
+                updated[index].minDice = parseInt(value) || 0;
+                setLiveOptions(updated);
+            };
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                setErrorMsg('');
+                const cleanPass = password.trim();
+
+                if (cleanPass === 'Chispitas14') {
+                    setView('narrator');
+                } else if (roles[cleanPass]) {
+                    setCurrentPlayer(roles[cleanPass]);
+                    setView('player');
+                } else {
+                    setErrorMsg('Código incorrecto.');
+                }
+            };
+
+            return (
+                <div className="max-w-6xl mx-auto px-4 py-8">
+                    
+                    {/* ENCABEZADO */}
+                    <header className="pb-6 mb-8 flex justify-between items-end border-b-4 border-rpgBorder">
+                        <div>
+                            <span className="text-sm font-bold uppercase tracking-widest text-rpgYellow bg-rpgBorder px-2 py-1 rounded-md">Nivel: Investigación</span>
+                            <h1 className="text-3xl font-black tracking-tight text-rpgCard mt-2" style={{textShadow: '2px 2px 0 #362720'}}>EL CASO DE LA PLACA ANCESTRAL</h1>
+                        </div>
+                        <div className="text-right text-sm font-bold text-rpgCard bg-rpgBorder px-3 py-1 rounded-md border-2 border-rpgBorder flex items-center gap-2">
+                            <svg className="w-4 h-4 text-rpgGreen" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                            Radio: Frecuencia 1
+                        </div>
+                    </header>
+
+                    {/* INTERFAZ DE LOGIN */}
+                    {view === 'login' && (
+                        <div className="max-w-md mx-auto mt-12 bg-rpgCard border-4 border-rpgBorder rounded-2xl p-8 shadow-[6px_6px_0_0_#362720]">
+                            <div className="text-center mb-6">
+                                <h2 className="text-2xl font-black uppercase tracking-wide text-rpgText">Conectar Dispositivo</h2>
+                                <p className="text-sm font-bold text-rpgBorder/70 mt-1">Inserta clave de personaje</p>
+                            </div>
+
+                            <form onSubmit={handleLogin} className="space-y-4">
+                                <input 
+                                    type="password" 
+                                    placeholder="••••••••" 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full bg-rpgInner border-4 border-rpgBorder rounded-xl px-4 py-3 text-center text-xl font-black tracking-widest text-rpgText focus:outline-none shadow-inner"
+                                />
+                                {errorMsg && <p className="bg-rpgRed/20 text-rpgRed border-2 border-rpgRed rounded-lg p-2 text-sm text-center font-bold">{errorMsg}</p>}
+                                <button type="submit" className="w-full bg-rpgGreen border-4 border-rpgBorder text-rpgText font-black uppercase text-xl py-3 rounded-xl shadow-[0_6px_0_0_#362720] active:translate-y-[6px] active:shadow-none transition-all">
+                                    Acceder al Sistema
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* VISTA DEL ALUMNO */}
+                    {view === 'player' && currentPlayer && (
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            <div className="lg:col-span-7 bg-rpgCard border-4 border-rpgBorder rounded-2xl p-6 space-y-6 shadow-[6px_6px_0_0_#362720]">
+                                <div className="flex justify-between items-center border-b-4 border-rpgBorder/20 pb-4">
+                                    <div>
+                                        <span className="text-xs font-black uppercase text-rpgRed bg-rpgBorder px-2 py-1 rounded text-white">Identidad Asignada</span>
+                                        <h2 className="text-2xl font-black mt-2 text-rpgText">
+                                            {isHoldingReveal ? currentPlayer.name : "[DATOS OCULTOS]"}
+                                        </h2>
+                                    </div>
+                                    <button 
+                                        onMouseDown={() => setIsHoldingReveal(true)} onMouseUp={() => setIsHoldingReveal(false)}
+                                        onTouchStart={() => setIsHoldingReveal(true)} onTouchEnd={() => setIsHoldingReveal(false)}
+                                        className="bg-rpgYellow border-4 border-rpgBorder text-rpgText font-black uppercase px-4 py-2 rounded-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none transition-all select-none flex items-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        Ver Perfil
+                                    </button>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-sm font-black uppercase text-rpgText">Instrucción de Consola:</h4>
+                                    <p className="font-bold text-rpgText bg-rpgInner p-4 rounded-xl border-4 border-rpgBorder">
+                                        {liveQuestion}
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-sm font-black uppercase text-rpgText">Historia Personal:</h4>
+                                    <p className="font-bold text-rpgText bg-rpgInner p-4 rounded-xl border-4 border-rpgBorder shadow-inner">
+                                        {currentPlayer.story}
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-sm font-black uppercase text-rpgText">Coartada Argumentativa:</h4>
+                                    <p className="font-bold text-white bg-rpgBg p-4 rounded-xl border-4 border-rpgBorder">
+                                        "{currentPlayer.alibi}"
+                                    </p>
+                                </div>
+
+                                <div className="flex justify-between items-center bg-rpgInner p-4 rounded-xl border-4 border-rpgBorder">
+                                    <span className="font-black text-lg uppercase">Puntos Vida:</span>
+                                    <div className="flex items-center gap-3">
+                                        <button onClick={() => setPlayerHP(playerHP - 10)} className="bg-rpgRed border-2 border-rpgBorder text-rpgText w-10 h-10 rounded-lg font-black text-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none">-</button>
+                                        <span className="text-2xl font-black bg-white border-4 border-rpgBorder px-4 py-1 rounded-lg">{playerHP}</span>
+                                        <button onClick={() => setPlayerHP(playerHP + 10)} className="bg-rpgGreen border-2 border-rpgBorder text-rpgText w-10 h-10 rounded-lg font-black text-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* EQUIVALENCIAS MICROBIT DEL ALUMNO */}
+                            <div className="lg:col-span-5 bg-rpgCard border-4 border-rpgBorder rounded-2xl p-6 space-y-4 shadow-[6px_6px_0_0_#362720] h-fit">
+                                <h3 className="font-black text-xl border-b-4 border-rpgBorder/20 pb-2 uppercase">Panel Micro:bit</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-rpgRed border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">BOTÓN A</span>
+                                            <span className="font-black text-rpgRed uppercase">Ataque</span>
+                                        </div>
+                                        <div className="font-bold ml-1">{currentPlayer.microA}</div>
+                                    </div>
+                                    <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-blue-400 border-2 border-rpgBorder text-rpgText px-3 py-1 rounded-lg font-black">BOTÓN B</span>
+                                            <span className="font-black text-blue-600 uppercase">Defensa</span>
+                                        </div>
+                                        <div className="font-bold ml-1">{currentPlayer.microD}</div>
+                                    </div>
+                                    <div className="p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder flex flex-col gap-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-rpgGreen border-2 border-rpgBorder text-rpgText px-2 py-1 rounded-lg font-black">A + B</span>
+                                            <span className="font-black text-rpgGreen uppercase">Escaneo</span>
+                                        </div>
+                                        <div className="font-bold ml-1">{currentPlayer.microE}</div>
+                                    </div>
+                                </div>
+                                <button onClick={() => setView('login')} className="w-full mt-4 bg-rpgBg border-4 border-rpgBorder text-white font-black text-lg py-3 rounded-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none uppercase">
+                                    Salir del Perfil
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* VISTA DEL NARRADOR */}
+                    {view === 'narrator' && (
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            
+                            {/* COLUMNA IZQUIERDA */}
+                            <div className="lg:col-span-8 bg-rpgCard border-4 border-rpgBorder rounded-2xl p-6 space-y-6 shadow-[6px_6px_0_0_#362720]">
+                                <div className="flex justify-between items-center border-b-4 border-rpgBorder/20 pb-4">
+                                    <div>
+                                        <h3 className="font-black text-2xl text-rpgText uppercase">Consola del Master</h3>
+                                    </div>
+                                    <button 
+                                        onClick={() => guardarEnLaNube(roles, liveQuestion)}
+                                        className="bg-rpgGreen border-4 border-rpgBorder text-rpgText font-black text-sm px-6 py-3 rounded-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none uppercase flex items-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                        Emitir a Jugadores
+                                    </button>
+                                </div>
+
+                                {/* SELECTOR DEL BANCO DE PREGUNTAS */}
+                                <div className="space-y-2 bg-rpgInner p-4 rounded-xl border-4 border-rpgBorder">
+                                    <label className="block text-sm font-black uppercase text-rpgText flex items-center gap-2">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                        Archivo de Eventos (Cargar Pista):
+                                    </label>
+                                    <select 
+                                        onChange={(e) => cargarDelBanco(e.target.value)}
+                                        className="w-full bg-white border-4 border-rpgBorder rounded-xl p-2 font-bold text-rpgText focus:outline-none cursor-pointer"
+                                    >
+                                        {BANCO_PREGUNTAS.map((pregunta, idx) => (
+                                            <option key={pregunta.id} value={idx}>{pregunta.title}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-black uppercase text-rpgText">Texto en Pantalla:</label>
+                                    <textarea 
+                                        value={liveQuestion}
+                                        onChange={(e) => setLiveQuestion(e.target.value)}
+                                        className="w-full bg-rpgInner border-4 border-rpgBorder rounded-xl p-3 font-bold text-rpgText focus:outline-none shadow-inner"
+                                        rows="2"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="block text-sm font-black uppercase text-rpgText">Opciones y Dados Mínimos:</label>
+                                    {liveOptions.map((opt, idx) => (
+                                        <div key={idx} className="flex gap-4 items-center bg-rpgInner p-3 rounded-xl border-4 border-rpgBorder">
+                                            <span className="font-black text-lg bg-rpgBg text-white w-8 h-8 flex items-center justify-center rounded-lg border-2 border-rpgBorder">{idx + 1}</span>
+                                            <input 
+                                                type="text" 
+                                                value={opt.text}
+                                                onChange={(e) => updateOptionText(idx, e.target.value)}
+                                                className="flex-grow bg-transparent font-bold text-sm focus:outline-none placeholder-rpgBg/50 text-rpgText"
+                                                placeholder={`Opción ${idx + 1}...`}
+                                            />
+                                            <div className="flex items-center gap-2 border-l-4 border-rpgBorder/20 pl-3">
+                                                <span className="text-xs font-black text-rpgText uppercase">Tirada:</span>
+                                                <input 
+                                                    type="number" 
+                                                    value={opt.minDice}
+                                                    onChange={(e) => updateOptionDice(idx, e.target.value)}
+                                                    className="w-16 bg-white border-4 border-rpgBorder rounded-lg px-2 py-1 text-center font-black text-rpgRed shadow-inner"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="pt-4 border-t-4 border-rpgBorder/20 space-y-4">
+                                    <h4 className="font-black text-lg uppercase text-rpgText">Modificar Historias Bases</h4>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {Object.keys(roles).map((key) => (
+                                            <div key={key} className="bg-rpgInner p-3 rounded-xl border-4 border-rpgBorder space-y-2">
+                                                <span className="text-sm font-black block uppercase bg-rpgBg text-white px-2 py-1 rounded-lg border-2 border-rpgBorder w-fit">{roles[key].name}</span>
+                                                <textarea 
+                                                    value={roles[key].story}
+                                                    onChange={(e) => {
+                                                        const updatedRoles = {...roles};
+                                                        updatedRoles[key].story = e.target.value;
+                                                        setRoles(updatedRoles);
+                                                    }}
+                                                    className="w-full bg-white border-2 border-rpgBorder rounded-lg p-2 text-xs font-bold shadow-inner"
+                                                    rows="3"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* COLUMNA DERECHA */}
+                            <div className="lg:col-span-4 bg-rpgCard border-4 border-rpgBorder rounded-2xl p-6 space-y-6 shadow-[6px_6px_0_0_#362720] h-fit">
+                                <h3 className="font-black text-xl uppercase border-b-4 border-rpgBorder/20 pb-2 text-rpgText">Salud Global</h3>
+                                <div className="space-y-3">
+                                    {Object.keys(playersScores).map((pKey) => (
+                                        <div key={pKey} className="flex flex-col gap-2 p-3 bg-rpgInner rounded-xl border-4 border-rpgBorder">
+                                            <span className="text-sm font-black uppercase text-rpgText leading-tight">{pKey}</span>
+                                            <div className="flex items-center justify-between bg-rpgBg border-2 border-rpgBorder rounded-lg p-1">
+                                                <button onClick={() => setPlayersScores({...playersScores, [pKey]: playersScores[pKey] - 10})} className="bg-rpgRed border-2 border-rpgBorder text-rpgText w-8 h-8 rounded text-lg font-black shadow-[0_2px_0_0_#362720] active:translate-y-[2px] active:shadow-none">-</button>
+                                                <span className="text-lg font-black text-white">{playersScores[pKey]}</span>
+                                                <button onClick={() => setPlayersScores({...playersScores, [pKey]: playersScores[pKey] + 10})} className="bg-rpgGreen border-2 border-rpgBorder text-rpgText w-8 h-8 rounded text-lg font-black shadow-[0_2px_0_0_#362720] active:translate-y-[2px] active:shadow-none">+</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setView('login')} className="w-full bg-rpgBg border-4 border-rpgBorder text-white font-black text-lg py-3 rounded-xl shadow-[0_4px_0_0_#362720] active:translate-y-[4px] active:shadow-none uppercase mt-4 flex justify-center items-center gap-2">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    Cerrar Consola
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
