@@ -18,13 +18,13 @@
                     },
                     colors: {
                         rpgBg: '#4A3F35',       
-                        rpgCard: '#DFD5BF',     
-                        rpgInner: '#CEBFB3',    
-                        rpgBorder: '#2B2520',   
-                        rpgText: '#211C18',     
-                        rpgGreen: '#59824C',    
-                        rpgRed: '#913F36',      
-                        rpgYellow: '#BFA36B',   
+                        rpgCard: '#dfd5bf',     
+                        rpgInner: '#cebfb3',    
+                        rpgBorder: '#2b2520',   
+                        rpgText: '#211c18',     
+                        rpgGreen: '#59824c',    
+                        rpgRed: '#913f36',      
+                        rpgYellow: '#bfa36b',   
                     }
                 }
             }
@@ -73,12 +73,18 @@
         };
 
         function App() {
-            // Inicialización de estados desde localStorage para evitar pérdidas de datos al refrescar
-            const [view, setView] = useState(() => localStorage.getItem('museo_view') || 'login');
-            const [password, setPassword] = useState(() => localStorage.getItem('museo_password') || '');
+            // Inicialización protegida contra restricciones de seguridad del navegador en modo local
+            const [view, setView] = useState(() => {
+                try { return localStorage.getItem('museo_view') || 'login'; } catch(e) { return 'login'; }
+            });
+            const [password, setPassword] = useState(() => {
+                try { return localStorage.getItem('museo_password') || ''; } catch(e) { return ''; }
+            });
             const [currentPlayer, setCurrentPlayer] = useState(() => {
-                const guardado = localStorage.getItem('museo_player');
-                return guardado ? JSON.parse(guardado) : null;
+                try {
+                    const guardado = localStorage.getItem('museo_player');
+                    return guardado ? JSON.parse(guardado) : null;
+                } catch(e) { return null; }
             });
             
             const [errorMsg, setErrorMsg] = useState('');
@@ -98,30 +104,32 @@
             const [inputRespuestaTexto, setInputRespuestaTexto] = useState('');
             const [showRoleEditor, setShowRoleEditor] = useState(false);
 
-            // Efectos para sincronizar de manera automática los cambios de estado en el almacenamiento local
+            // Guardado seguro en almacenamiento local
             useEffect(() => {
-                localStorage.setItem('museo_view', view);
+                try { localStorage.setItem('museo_view', view); } catch(e) {}
             }, [view]);
 
             useEffect(() => {
-                localStorage.setItem('museo_password', password);
+                try { localStorage.setItem('museo_password', password); } catch(e) {}
             }, [password]);
 
             useEffect(() => {
-                if (currentPlayer) {
-                    localStorage.setItem('museo_player', JSON.stringify(currentPlayer));
-                } else {
-                    localStorage.removeItem('museo_player');
-                }
+                try {
+                    if (currentPlayer) {
+                        localStorage.setItem('museo_player', JSON.stringify(currentPlayer));
+                    } else {
+                        localStorage.removeItem('museo_player');
+                    }
+                } catch(e) {}
             }, [currentPlayer]);
 
+            // Conexión y escucha en tiempo real de Supabase
             useEffect(() => {
                 if (!clienteSupabase) return;
 
                 clienteSupabase.from('juego_museo').select('*').eq('id', 'partida_1').single().then(({ data }) => {
                     if (data) {
                         if (data.roles_json) setRoles(data.roles_json);
-                        if (data.pregunta_actual) setLiveQuestion(data.pregunta_actual);
                         if (data.scores_json) setPlayersScores(data.scores_json);
                         if (data.respuestas_json) setRespuestasPantalla(data.respuestas_json);
                     }
@@ -130,7 +138,6 @@
                 const channel = clienteSupabase.channel('cambios-museo')
                     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'juego_museo' }, payload => {
                         if (payload.new.roles_json) setRoles(payload.new.roles_json);
-                        if (payload.new.pregunta_actual) setLiveQuestion(payload.new.pregunta_actual);
                         if (payload.new.scores_json) setPlayersScores(payload.new.scores_json);
                         if (payload.new.respuestas_json) setRespuestasPantalla(payload.new.respuestas_json);
                     })
@@ -146,11 +153,10 @@
                 }
             }, [roles]);
 
-            const enviarAlServidor = async (nuevosRoles, nuevaPregunta, nuevosScores, nuevasRespuestas) => {
+            const enviarAlServidor = async (nuevosRoles, nuevosScores, nuevasRespuestas) => {
                 if (!clienteSupabase) return;
                 await clienteSupabase.from('juego_museo').update({
                     roles_json: nuevosRoles,
-                    pregunta_actual: nuevaPregunta,
                     scores_json: nuevosScores,
                     respuestas_json: nuevasRespuestas
                 }).eq('id', 'partida_1');
@@ -174,7 +180,7 @@
                     [nombrePersona]: Math.max(0, Math.min(100, playersScores[nombrePersona] + delta))
                 };
                 setPlayersScores(nuevosScores);
-                enviarAlServidor(roles, liveQuestion, nuevosScores, respuestasPantalla);
+                enviarAlServidor(roles, nuevosScores, respuestasPantalla);
             };
 
             const guardarRespuestaIndividual = () => {
@@ -184,12 +190,12 @@
                 };
                 setRespuestasPantalla(nuevasRespuestas);
                 setInputRespuestaTexto('');
-                enviarAlServidor(roles, liveQuestion, playersScores, nuevasRespuestas);
+                enviarAlServidor(roles, playersScores, nuevasRespuestas);
             };
 
             const reiniciarFichasVerbales = () => {
                 setRespuestasPantalla(INITIAL_RESPUESTAS);
-                enviarAlServidor(roles, liveQuestion, playersScores, INITIAL_RESPUESTAS);
+                enviarAlServidor(roles, playersScores, INITIAL_RESPUESTAS);
             };
 
             const updateRoleField = (key, field, value) => {
@@ -201,9 +207,11 @@
             };
 
             const handleLogout = () => {
-                localStorage.removeItem('museo_view');
-                localStorage.removeItem('museo_password');
-                localStorage.removeItem('museo_player');
+                try {
+                    localStorage.removeItem('museo_view');
+                    localStorage.removeItem('museo_password');
+                    localStorage.removeItem('museo_player');
+                } catch(e) {}
                 setCurrentPlayer(null);
                 setPassword('');
                 setView('login');
@@ -267,12 +275,12 @@
             return (
                 <div className="max-w-7xl mx-auto px-2 py-4">
                     
-                    {/* PANEL DE ICONOS Y RESPUESTAS BAJO ELLOS */}
+                    {/* PANEL DE ICONOS GENERAL */}
                     {view !== 'login' && (
                         <div className="mb-6">
                             <div className="bg-rpgBorder text-rpgCard px-4 py-2 rounded-t-xl font-black text-xs uppercase tracking-widest flex items-center gap-2">
                                 <svg className="w-4 h-4 stroke-rpgCard fill-none" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                                Estado General de la Investigation
+                                Estado General de la Investigación
                             </div>
                             <div className="bg-rpgBg/30 border-x-4 border-b-4 border-rpgBorder p-4 rounded-b-xl">
                                 <CuadriculaPersonajes />
@@ -382,6 +390,7 @@
                                 </div>
                             </div>
 
+                            {/* PANEL ACCIONES ESPECIALES */}
                             <div className="lg:col-span-4 bg-rpgCard border-4 border-rpgBorder rounded-xl p-4 space-y-4 shadow-[5px_5px_0_0_#2b2520] h-fit">
                                 <h3 className="font-black text-sm uppercase border-b-2 border-rpgBorder/20 pb-1 text-rpgText">Acciones Micro:bit</h3>
                                 <p className="text-[10px] font-medium text-rpgText/70">Anuncia verbalmente al profesor el uso de estas opciones para modular el interrogatorio.</p>
@@ -416,21 +425,11 @@
                                 <div className="flex justify-between items-center border-b-2 border-rpgBorder/20 pb-2">
                                     <h3 className="font-black text-lg text-rpgText uppercase">Consola Maestra del Historiador</h3>
                                     <button 
-                                        onClick={() => enviarAlServidor(roles, liveQuestion, playersScores, respuestasPantalla)}
+                                        onClick={() => enviarAlServidor(roles, playersScores, respuestasPantalla)}
                                         className="bg-rpgGreen text-white font-black text-xs px-4 py-2 rounded border-2 border-rpgBorder shadow"
                                     >
                                         Emitir Cambios a Pizarra
                                     </button>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <label className="block text-xs font-black uppercase text-rpgText">Situación o Suceso Actual:</label>
-                                    <textarea 
-                                        value={liveQuestion}
-                                        onChange={(e) => setLiveQuestion(e.target.value)}
-                                        className="w-full bg-white border-2 border-rpgBorder rounded-lg p-2 text-xs font-bold text-rpgText focus:outline-none"
-                                        rows="2"
-                                    />
                                 </div>
 
                                 <div className="p-3 bg-amber-50 border-2 border-rpgBorder rounded-lg space-y-3">
@@ -513,7 +512,7 @@
                             {/* GESTIÓN DE SALUD / DAÑO DESDE EL MASTER */}
                             <div className="lg:col-span-4 bg-rpgCard border-4 border-rpgBorder rounded-xl p-4 space-y-3 shadow-[5px_5px_0_0_#2b2520] h-fit">
                                 <h3 className="font-black text-sm uppercase border-b-2 border-rpgBorder/20 pb-1 text-rpgText">Modificador de HP</h3>
-                                <p className="text-[10px] font-medium text-rpgText/70">Resta puntos si responden incorrectamente o si mienten de forma arriesgada.</p>
+                                <p className="text-[10px] font-medium text-rpgText/70">Resta puntos si mienten o fallan el interrogatorio.</p>
                                 
                                 <div className="space-y-2">
                                     {Object.keys(playersScores).map((name) => (
